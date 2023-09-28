@@ -1,26 +1,27 @@
 use core::panic;
-use models::{request_data::RequestData, test::TestResult};
+use models::{request_data::RequestData, test_result::TestResult};
 use tokio::{
     sync::mpsc::{channel, Sender},
     task,
 };
 
 pub mod config;
+pub mod http_client;
 pub mod models;
 mod repository;
 
 #[tokio::main]
 async fn main() {
-    let client = repository::http_client::create_client();
+    let client = http_client::create_client();
+
     let (tx, rx) = channel::<RequestData>(40);
 
     let number_of_runs = config::CONFIG.requests;
     let concurrency = config::CONFIG.workers;
     let runs_worker_for_workers = number_of_runs / concurrency;
-    let base_url = config::CONFIG.url.clone().unwrap();
     let url = match config::CONFIG.query_string.clone() {
-        Some(val) => base_url + val.as_str(),
-        None => base_url,
+        Some(val) => config::CONFIG.url.clone().unwrap() + val.as_str(),
+        None => config::CONFIG.query_string.clone().unwrap(),
     };
 
     println!("Config - url: {}", url.clone());

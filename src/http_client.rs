@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use reqwest::{
-    header::{self, HeaderMap},
+    header::{self, HeaderMap, ACCEPT_ENCODING},
     Client, RequestBuilder,
 };
 use tokio::time::Instant;
@@ -10,14 +10,14 @@ use crate::{config::CONFIG, models::request_data::RequestData};
 
 pub fn create_client() -> Client {
     let mut header_map = HeaderMap::new();
-    //Add acceptance headers for both encoding and contenttype
-    header_map.append(
-        header::ACCEPT_ENCODING,
-        "br;q=1.0, gzip;q=0.8, *;q=0.1".parse().unwrap(),
-    );
+
     header_map.append(header::ACCEPT, "application/json".parse().unwrap());
-    for header in CONFIG.auth_headers.clone() {
-        header_map.append(header.key, header.value.clone());
+
+    for header in CONFIG.request_headers.clone() {
+        match header.key.as_str() {
+            x if x.contains("ENCODING") => header_map.append(ACCEPT_ENCODING, header.value),
+            _ => header_map.append(header.key, header.value),
+        };
     }
 
     //Build Client

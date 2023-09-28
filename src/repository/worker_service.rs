@@ -6,9 +6,9 @@ use tokio::{
     time::timeout,
 };
 
-use crate::models::{request_data::RequestData, test::TestResult};
+use crate::models::{request_data::RequestData, test_result::TestResult};
 
-use super::http_client::extract_request_data;
+use crate::http_client::extract_request_data;
 
 pub async fn receiver_handel(rx: Receiver<RequestData>, expected_amount: usize) -> TestResult {
     let mut data_store = Vec::<RequestData>::with_capacity(expected_amount);
